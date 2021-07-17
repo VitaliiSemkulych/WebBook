@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<!-- User menu fragment-->
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Title</title>
+    <link href="../css/fragmentCSS/menu.css" rel="stylesheet" type="text/css" th:href="@{../css/fragmentCSS/menu.css}"/>
+    <link href="../css/fragmentCSS/myPage.css" rel="stylesheet" type="text/css" th:href="@{../css/fragmentCSS/myPage.css}"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+<aside class="col-2" th:fragment="userPanel">
+    <h4 class="authorsListTitle" th:text="${session.lodinUser.userName}"></h4>
+
+    <img alt="User logo"  th:src="@{'data:image/jpeg;base64,'+${session.lodinUser.getBase64ImagetoString()}}" class="img-responsive" style="margin-left:15px;width: 80%;height: 18%;margin-right:15px;"/>
+    <nav class="nav flex-column">
+        <a th:href="@{/readingPage}" th:class="nav-link" th:classappend="${session.userPageLink}? disabled:singleLetter">My page</a>
+        <a th:text="Settings" th:href="@{/userSettings}" th:class="nav-link" th:classappend="${session.settingsLink}? disabled:singleLetter"></a>
+        <a th:text="Exit" th:class="nav-link" th:classappend="singleLetter" th:href="@{/logoutSuccessful}"></a>
+
+    </nav>
+</aside>
+</body>
+</html>

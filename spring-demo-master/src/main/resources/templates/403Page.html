@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<!-- Error Page: refuse authentication right error-->
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Access Denied</title>
+</head>
+<body>
+<h3 th:if="${message != null}" th:utext="${message}" style="color: red;"></h3>
+</body>
+</html>

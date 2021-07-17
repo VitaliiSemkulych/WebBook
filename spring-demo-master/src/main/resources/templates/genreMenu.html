@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<!-- Genre menu fragment-->
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Title</title>
+    <link href="../css/fragmentCSS/menu.css" rel="stylesheet" type="text/css" th:href="@{../css/fragmentCSS/menu.css}"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+<aside class="col-2" th:fragment="genrePanel">
+    <h4 class="authorsListTitle">Genre List:</h4>
+    <nav class="nav flex-column">
+            <a th:each="genre : ${session.genreList}" th:text="${genre.name}" th:href="@{/searchByGenre(id=${genre.id})}" th:class="nav-link" th:classappend="${session.genreId eq genre.id}? disabled:singleLetter"></a>
+    </nav>
+    
+</aside>
+</body>
+</html>

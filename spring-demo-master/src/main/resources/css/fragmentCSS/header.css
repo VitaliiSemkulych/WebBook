@@ -1,0 +1,65 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 10.12.2018, 5:55:18
+    Author     : Admin
+    Objection  : header styles
+*/
+
+
+header {
+    background: dimgray;
+    position: relative;
+    overflow: hidden;
+}
+
+.header__logo {
+    background: #ffffff;
+    padding-right: 20px;
+    border-radius: 54px;
+    margin: 0.35%;
+    padding: 0.5%; }
+.header__logo img{
+    max-width: 50px;
+}
+
+.header__row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center; }
+
+
+.header .btn_header {
+    display: inline-block;
+    vertical-align: middle;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 14pt; }
+.header_search{
+    padding-left: 10px;
+    padding-right: 10px;
+
+    margin-right: 34%;
+
+}
+.header_login_search{
+    padding-left: 10px;
+    padding-right: 10px;
+
+    margin-right: 3%;
+
+}
+.header_logo_text{
+    padding-left: 10px;
+    padding-right: 10px;
+
+    margin-right: 55%;
+}
+
+
+

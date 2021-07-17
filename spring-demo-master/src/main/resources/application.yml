@@ -1,0 +1,75 @@
+
+server:
+  servlet:
+   context-path: "/"
+  port : 9443
+  ssl:
+    enabled: true
+    key-store: "classpath:sslsecurity.p12"
+    key-store-password: "password"
+    key-store-type: "PKCS12"
+    key-alias: "sslsecurity"
+
+
+
+spring:
+  datasource:
+   url: "jdbc:postgresql://localhost:5432/webbook"
+   username: "postgres"
+   password: "postgres"
+   driver-class-name: "org.postgresql.Driver"
+   testWhileIdle: true
+   validationQuery: "SELECT 1"
+
+  jpa:
+    show-sql: true
+    hibernate.ddl-auto: "update"
+    properties.hibernate.dialect: "org.hibernate.dialect.PostgreSQLDialect"
+
+  mail:
+    host: "smtp.gmail.com"
+    port: 465
+    username: "elwebbook@gmail.com"
+    password: "Vitalii1995"
+    protocol: "smtps"
+    debug: true
+    properties.mail.smtp:
+          auth: true
+          starttls:
+            enable: true
+
+    sender:
+      name: "WebBook"
+      subject: "Please verify your registration"
+      url: "https://localhost:9443"
+
+  security:
+    rememberMe,token.expiration.time: 30 * 24 * 60 * 60
+    oauth2:
+      client:
+        registration:
+          facebook:
+            clientId: 192144046194251
+            clientSecret: d961adc7f547dc1189d61813c4b737a5
+            scope:
+              - email
+              - public_profile
+          google:
+            client-id: 51775286988-knqrjdg2jps0hjfv16v7s2vvbel1srtd.apps.googleusercontent.com
+            client-secret: ujKVjMsqZ9PN-IVWuCzuTNbq
+            scope:
+              - email
+              - profile
+              - openid
+
+
+
+logging:
+  level:
+    org:
+      springframework: "INFO"
+
+
+
+cors.allow.origins: "*"
+

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<!-- Heade fragment of login page-->
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Title</title>
+    <link href="../css/fragmentCSS/header.css" rel="stylesheet" type="text/css" th:href="@{../css/fragmentCSS/header.css}"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+<header class="col-12" th:fragment="loginPageHead">
+    <div class="header__row">
+        <div class="header__logo">
+            <img src="../images/search.PNG" alt="Search image" class="searchImage">
+
+        </div>
+        <div class="header_logo_text">
+            <strong class="findLable">WebBook</strong>
+        </div>
+
+        <div class="header_login_search">
+            <span class="findLable">Sing In</span>
+            <form  th:action="@{/j_spring_security_check}" method="POST">
+                <input  type="email" name="loginEmail" class="active-cyan-4" style="border-radius: 5px;" size="20" placeholder="Email" required/>
+                <input type="password" name="loginPassword" class="active-cyan-4" style=";border-radius: 5px;" size="20"placeholder="Password" required/>
+                <input type="submit" class="btn btn-primary btn-sm" value="Log in" />
+            </form>
+            <div th:if="${#request.getParameter('error') == 'true'}" class="passwordErrorStyle">
+                Login Failed!!! <strong th:if="${#session!= null and #session.getAttribute('SPRING_SECURITY_LAST_EXCEPTION') != null}"
+                      th:utext="${#session.getAttribute('SPRING_SECURITY_LAST_EXCEPTION').message}"></strong>
+            </div>
+
+        </div>
+
+    </div>
+</header>
+
+</body>
+</html>

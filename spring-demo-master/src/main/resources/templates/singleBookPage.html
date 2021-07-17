@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<!-- Single book page-->
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>WebBook</title>
+    <th:block th:insert="~{BookMain.html :: link}"></th:block>
+    <script>
+        $('#active-panel-container').on('scroll', function(e) {
+            console.log('scrolling');
+        });
+    </script>
+</head>
+<body >
+<div class="container-fluid">
+    <div class="row">
+<th:block th:replace="~{header.html :: head}"></th:block>
+    </div>
+    <div class="row">
+<th:block th:replace="~{letter.html :: letterPanel}"></th:block>
+    </div>
+    <div class="row">
+<th:block th:replace="~{userMenu.html :: userPanel}"></th:block>
+<div class="col-8" style="background-color: #e8e8e8;">
+    <div class="row">
+        <div class="col-3">
+            <div th:if="${!isEvaluated}">
+                <form  name="evaluateForm"  th:action="@{/evaluate}"  method="POST">
+                    <span class="singleBookTitle">Evaluate</span>
+                    <input type="hidden" name="id" th:value="${book.id}"/>
+                    <select name="marckValue" class="mdb-select">
+                        <option th:each="singleMarck : ${marckOptionsList}"
+                                th:value="${singleMarck}"
+                                th:text="${singleMarck}">
+                        </option>
+                    </select>
+
+                    <input type="submit" value="Evaluate" class="btn btn-primary btn-sm">
+
+                </form>
+            </div>
+            <img th:src="@{'data:image/jpeg;base64,'+${book.baseImage}}" alt="Book image" class="img-responsive" style="width: 100%;height: 55%;">
+            <div> <a th:href="@{/getContent(id=${book.id},disposition='inline')}" target="_blank"><img style="margin-top:7px;margin-left:-3px; height:60px;width:60px;" src="../images/read.png" alt="Read image"></a>
+                <a th:href="@{/getContent(id=${book.id},disposition='attachment')}" target="_blank"><img style="margin-left:7px;margin-top:7px; height:60px;width:140px;" src="../images/download.png" alt="Download image"></a>
+            </div>
+            <div>
+                <a th:href="@{/changeReadingMode(id=${book.id})}">
+                    <img th:if="${inReadingMode}" src="../images/readingChecked.png" class="checkBoxIMG"/>
+                    <img th:if="${!inReadingMode}" src="../images/readingUnchecked.png" class="checkBoxIMG"/></a>
+                <a th:href="@{/changeReadMode(id=${book.id})}">
+                    <img th:if="${inReadMode}" src="../images/readedChecked.png" class="checkBoxIMG"/>
+                    <img th:if="${!inReadMode}" src="../images/readedUnchecked.png" class="checkBoxIMG"/></a>
+                <a th:href="@{/changeInterestingMode(id=${book.id})}">
+                    <img th:if="${inInterestingMode}" src="../images/interestingChecked.png" class="checkBoxIMG"/>
+                    <img th:if="${!inInterestingMode}" src="../images/interestingUnchecked.png" class="checkBoxIMG"/></a>
+            </div>
+
+        </div>
+        <div class="col-6">
+            <p class="authorsListTitle">
+                <span th:text="${book.getBookName()}"></span>
+
+            </p>
+            <p>
+                <strong style="background-color: #e8e8e8;">Description: </strong>
+                <span th:text="${book.getDescription()}"></span>
+            </p>
+            <p>
+                <strong style="background-color: #e8e8e8;">ISBN:</strong>
+                <span th:text="${book.getIsbn()}"></span>
+
+            </p>
+            <p>
+                <strong style="background-color: #e8e8e8;">Publisher:</strong>
+                <span th:text="${book.getPublisher().getPublisherName()}"></span>
+            </p>
+
+            <p>
+                <strong style="background-color: #e8e8e8;">Number of Pagies:</strong>
+                <span th:text="${book.getPageNumber()}"></span>
+            </p>
+
+            <p>
+                <strong style="background-color: #e8e8e8;">Publish Date:</strong>
+                <span th:text="${book.getPublishYear()}"></span>
+            </p>
+
+            <p>
+                <strong style="background-color: #e8e8e8;">Author:</strong>
+                <span th:text="${book.getAuthor().getName()}"></span>
+
+            </p>
+            <p>
+                <strong style="background-color: #e8e8e8;">Mark:</strong>
+                <span th:text="${bookMarck}"></span>
+
+            </p>
+        </div>
+        <div class="col-3">
+            <h4 class="authorsListTitle">Recension:</h4>
+            <div id="active-panel-container" class="recensionPanel searchedPanel">
+                <div th:each="singleRecension : ${recensionList}" class="singleRecension">
+                    <p class="authorsRecensionTitle"><span th:text="${singleRecension.formedUserName}"></span> </p>
+                    <img th:src="@{'data:image/jpeg;base64,'+${session.lodinUser.getBase64ImagetoString()}}" class="recensionImage"/>
+                    <p style="margin-left: 3px;" th:text="${singleRecension.recensionText}"></p>
+                    <div style="clear:both;"></div>
+                    <div th:if="${(singleRecension.unformedUserEmail eq session.lodinUser.userEmail) and (singleRecension.recensionId ne session.modifyRecensionId)}">
+                        <a th:href="@{/modifyMode(id=${book.id},recensionId=${singleRecension.recensionId})}" class="deleteRecensionLink">Modify</a>
+                        <a th:href="@{/delateRecension(id=${book.id},recensionId=${singleRecension.recensionId})}" class="deleteRecensionLink">Delete</a>
+                    </div>
+                    <div th:if="${singleRecension.recensionId eq session.modifyRecensionId}">
+                        <form id="modifyRecentionForm" th:action="@{/acceptModification}" method="POST">
+                            <input type="hidden" name="id" th:value="${book.id}"/>
+                            <input type="hidden" name="recensionId" th:value="${singleRecension.recensionId}"/>
+                            <textarea rows="7" cols="20" name="modifyRecensionText" placeholder="Input Your Book Recension" class="recensionTextArea" required></textarea>
+                            <input type="submit" class="btn btn-lg btn-primary" value="Modify"/>
+                            <a th:href="@{/cancelModifyMode(id=${book.id})}" class="deleteRecensionLink">Cancel</a>
+                        </form>
+
+                    </div>
+
+                </div>
+            </div>
+            <form th:if="${session.modifyRecensionId eq -1}" id="recentionForm" th:action="@{/sendRecension}" method="POST">
+                <input type="hidden" name="id" th:value="${book.id}"/>
+                <textarea rows="7" cols="20" name="recensionText" placeholder="Input Your Book Recension" class="recensionTextArea" required></textarea>
+                <input type="submit" class="btn btn-lg btn-primary" style="margin-left: 10%;" value="Leave Recension"/>
+            </form>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+<th:block th:replace="~{genreMenu.html :: genrePanel}"></th:block>
+</div>
+</div>
+<th:block th:insert="~{BookMain.html :: body/script}"></th:block>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<!-- Search book page. Appears after logging.-->
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>WebBook</title>
+
+    <link href="../css/fragmentCSS/menu.css" rel="stylesheet" type="text/css" th:href="@{../css/fragmentCSS/menu.css}"/>
+    <link href="../css/fragmentCSS/header.css" rel="stylesheet" type="text/css" th:href="@{../css/fragmentCSS/header.css}"/>
+    <link href="../css/singleBookPage.css" rel="stylesheet" type="text/css" th:href="@{../css/singleBookPage.css}"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+    <th:block th:replace="~{header.html :: head}"></th:block>
+    </div>
+    <div class="row">
+    <th:block th:replace="~{letter.html :: letterPanel}"></th:block>
+    </div>
+    <div class="row">
+    <div th:replace="~{userMenu.html :: userPanel}"></div>
+
+    <div class="col-8" style="background-color: #e8e8e8;">
+        <div class="row">
+        <div  class="col-12" style="background-color: dimgray;" >
+            <p class="findLable">Find Book:<span th:text="${searchBookNumber}"></span></p>
+        </div>
+        </div>
+        <div class="row" style=" padding-bottom: 2%;">
+        <div class="col-4" th:each="book : ${bookList}">
+
+            <div class="card" style="margin-top: 10px;">
+                <a th:href="@{/singleBook(id=${book.id})}" style="margin-top: 2%;">
+                <img th:src="@{'data:image/jpeg;base64,'+${book.baseImage}}" alt="Book image" class="card-img-top" style="width: 80%;height: 80%;margin-left: 10%;">
+                </a>
+                <div th:class="card-body">
+                    <strong class="card-title" th:text="${book.bookName}"> </strong>
+                    <br><strong>ISBN:</strong> <span th:text="${book.isbn}"></span>
+                    <br><strong>Publisher:</strong><span th:text="${book.publisher.publisherName}"></span>
+                    <br><strong>Number of Pagies:</strong><span th:text="${book.pageNumber}"></span>
+                    <br><strong>Publish Date:</strong><span th:text="${book.publishYear}"></span>
+                    <br><strong>Author:</strong><span th:text="${book.author.name}"></span>
+
+                </div>
+            </div>
+
+        </div>
+
+        </div>
+        <div class="row">
+            <div class="col-12" >
+        <nav th:if="${pageNumbrs.size()}>=1" style="margin-left: 33%;margin-top: 3%;">
+            <ul class="pagination">
+
+                <li class="page-item">
+                <a th:if="${pageNumbrs.size()>1}" th:href="@{/previousPage(page=${selectedPage},pageName='BookMain')}" class="page-link">Previous Page </a>
+                </li>
+                <li th:each="singlePage: ${pageNumbrs}" class="page-item" th:classappend="${selectedPage eq singlePage}? active">
+                <a  th:text="${singlePage}" th:href="@{/selectPage(page=${singlePage},pageName='BookMain')}" th:class="page-link"></a>
+                </li>
+
+                <li class="page-item">
+                    <a th:if="${pageNumbrs.size()>1}" th:href="@{/nextPage(page=${selectedPage},pageName='BookMain')}" class="page-link">Next Page </a>
+                </li>
+
+
+
+            </ul>
+        </nav>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:replace="~{genreMenu.html :: genrePanel}"></th:block>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+</body>
+</html>

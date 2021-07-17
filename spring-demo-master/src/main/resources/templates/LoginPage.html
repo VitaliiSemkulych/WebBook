@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!--Login and registration page. Welcome application page. -->
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>WebBook</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="../css/fragmentCSS/header.css" rel="stylesheet" type="text/css" th:href="@{../css/fragmentCSS/header.css}"/>
+    <link href="../css/fragmentCSS/menu.css" rel="stylesheet" type="text/css" th:href="@{../css/fragmentCSS/menu.css}"/>
+
+
+</head>
+<body>
+<div class="container-fluid">
+<div class="row">
+    <th:block th:replace="~{loginPageHeader.html :: loginPageHead}"></th:block>
+</div>
+<div class="row"  style="background-color: #e8e8e8;">
+    <div class="col-6" >
+        <img class="picture" src="../images/bookSigh.png" alt="logo image"/>
+
+        <p style="margin-left: 35%" class="singleLetter">Welcome to the online library where you can find any book of your choice. Available search, browse, sort, and many others.</p>
+    </div>
+
+    <div class="col-6">
+        <p class="authorsListTitle">Registration</p>
+
+
+        <form th:action="@{/registrate}"  th:object="${user}" enctype="multipart/form-data" method="POST" style="margin-left: 30%;padding-bottom: 10.5%">
+            <p class="singleLetter">User Name</p>
+            <input  type="text" th:field="*{userName}" class="active-cyan-4" style="width: 400px;border-radius: 5px;margin-bottom: 2%;" placeholder="Name" required/><br>
+            <span th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}">..</span>
+            <p class="singleLetter">Email</p>
+            <input  type="email" th:field="*{userEmail}" class="active-cyan-4" style="width: 400px;border-radius: 5px;margin-bottom: 2%;" placeholder="Email" required/><br>
+            <span th:if="${#fields.hasErrors('userEmail')}" th:errors="*{userEmail}">..</span>
+            <p class="singleLetter">Password</p>
+            <input type="password" th:field="*{password}" class="active-cyan-4" style="width: 400px;border-radius: 5px;margin-bottom: 2%;" placeholder="Password" required/><br>
+            <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}">..</span>
+           <p class="singleLetter">Telephone Numner</p>
+            <input  type="text" th:field="*{telephoneNumber}" class="active-cyan-4" style="width: 400px;border-radius: 5px;margin-bottom: 2%;"  placeholder="Phone Number" required/><br>
+            <span th:if="${#fields.hasErrors('telephoneNumber')}" th:errors="*{telephoneNumber}">..</span>
+            <div class="file-field">
+                <div class="z-depth-1-half mb-4" style="width: 100px; height: 100px;">
+                    <img src="https://mdbootstrap.com/img/Photos/Others/placeholder.jpg" class="img-fluid" style="width: 100px; height: 100px;"
+                         alt="choose file">
+                </div>
+                <div class="d-flex justify-content">
+                    <div class="btn btn-mdb-color btn-rounded float-left">
+                        <span>Choose file</span>
+                        <input type="file" th:field="*{image}" name="editFile" >
+                    </div>
+                </div>
+            </div>
+            <input type="submit" class="btn btn-lg btn-primary" value="Registrate" />
+            <div th:if="${registMessage != null}" th:utext="${registMessage}" class="passwordErrorStyle"></div>
+        </form>
+
+    </div>
+
+</div>
+</div>
+
+
+</body>
+</html>

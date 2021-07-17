@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!-- Header fragment of page-->
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Title</title>
+    <link href="../css/fragmentCSS/header.css" rel="stylesheet" type="text/css" th:href="@{../css/fragmentCSS/header.css}"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body >
+
+<header class="col-12" th:fragment="head">
+    <div class="header__row">
+        <div class="header__logo">
+            <img src="../images/search.PNG" alt="Search image" class="searchImage"/>
+        </div>
+        <div class="header_search">
+            <form name="SearchForm"  th:action="@{/searchByPhrace}" th:object="${searchByPhrace}" method="POST">
+                <input type="submit" value="Search" class="btn btn-primary btn-sm">
+                <input type="text" th:field="*{searchPhrace}" style="width: 400px; border-radius: 5px;" class="active-cyan-4 " placeholder="Input Search Value" required>
+                <select th:field="*{searchType}" class="mdb-select" style="border-radius: 5px;" >
+                    <option th:each="searchType : ${T(com.example.demo.enums.SearchType).values()}"
+                            th:value="${searchType}"
+                            th:text="${searchType.value}">
+                    </option>
+                </select>
+
+            </form>
+        </div>
+
+    </div>
+</header>
+
+
+</body>
+</html>

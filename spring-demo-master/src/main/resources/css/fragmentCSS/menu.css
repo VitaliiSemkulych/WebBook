@@ -1,0 +1,65 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 10.12.2018, 5:55:29
+    Author     : Admin
+    Objection  : menu styles
+*/
+
+aside {
+    background: lightgray;
+    position: relative;
+    overflow: hidden;
+}
+nav a:hover{
+
+    background-color: yellow;
+    border-radius: 10px;
+}
+.singleLetter{
+    color: navy;
+    font-family: cursive;
+
+}
+.findLable{
+    font-size: 25px;
+    font-family: cursive;
+    font-weight: bold;
+    color: mintcream;
+    font-weight: bold;
+    margin: 0px;
+
+}
+div.col-4 a:hover{
+    text-decoration: none;
+
+}
+.picture {
+
+
+    height: 50%;
+    width: 50%;
+    margin-left: 40%;
+    margin-top: 15%;
+    background-repeat: no-repeat;
+
+}
+.authorsListTitle{
+    color: navy;
+    font-family: cursive;
+    margin-top: 20px;
+    padding-right: 15px;
+    padding-left: 15px; 
+    text-align: center;
+    font-size: 25px;
+    padding-bottom: 10px;
+}
+
+a:hover, a:active, a:focus { 
+    text-decoration: none;
+    color: navy;
+}
+
