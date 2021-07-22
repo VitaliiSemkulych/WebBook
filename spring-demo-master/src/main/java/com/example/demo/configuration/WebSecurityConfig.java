@@ -4,7 +4,7 @@ package com.example.demo.configuration;
 
 
 import com.example.demo.handlers.OAuth2LoginSuccessHandler;
-import com.example.demo.service.OAuth2UserService;
+import com.example.demo.service.security.OAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,7 +51,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/", "/login","/registrate","/logout").permitAll()
+                .antMatchers("/", "/login","/enroll","/logout","/activate").permitAll()
                 .antMatchers("/webjars/**","/images/**","/css/**","/js/**").permitAll()
                 .anyRequest().authenticated()
                 .and()

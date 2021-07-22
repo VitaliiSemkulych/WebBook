@@ -21,25 +21,40 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper=true,onlyExplicitlyIncluded = true)
-@ToString(of = {"bookName","isbn"})
+@ToString(of = {"name","isbn"})
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Book extends AbstractEntity{
 
 
-    @Column(name = "book_name")
-    private String bookName;
+    @Column(name = "book_name",unique = true,nullable = false)
+    private String name;
     @Column(name = "page_number")
     private int pageNumber;
-    private byte[] content;
     private String isbn;
     @Column(name = "issued_date")
     @Temporal(TemporalType.DATE)
     @DateTimeFormat(pattern = "YYYY-MM-DD")
     private Date issuedDate;
-    private byte[] image;
     private String description;
 
+//----------------------------------------------------------------------------
+//Used in case of storing document in database
+//    @Lob
+//    @Basic(fetch = FetchType.LAZY)
+//    @Column(name="book_logo", columnDefinition="longblob", nullable=true)
+//    private byte[] image;
+//    @Lob
+//    @Basic(fetch = FetchType.LAZY)
+//    @Column(name="book_content", columnDefinition="longblob", nullable=true)
+//    private byte[] content;
+//------------------------------------------------------------------------------
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "image_id", referencedColumnName = "id")
+    private FileInfo image;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "content_id", referencedColumnName = "id")
+    private FileInfo content;
     //many to many
     @ManyToMany(cascade = {
             CascadeType.PERSIST,

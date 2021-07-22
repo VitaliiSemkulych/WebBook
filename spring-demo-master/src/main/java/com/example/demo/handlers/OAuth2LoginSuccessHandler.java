@@ -4,11 +4,9 @@ package com.example.demo.handlers;
 import com.example.demo.enums.LoginType;
 import com.example.demo.model.security.User;
 import com.example.demo.repository.security.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import com.example.demo.service.security.RoleService;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -20,52 +18,32 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.stream.Collectors;
+import java.util.Date;
 
 
 @Component
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    @Value("${jwt.header.UserAgent}")
-    private String userAgentHeader;
-
-
     private final UserRepository userRepository;
-    private final ObjectMapper objectMapper;
-    private final JwtService jwtService;
     private final RoleService roleService;
 
     @Transactional
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
+                                        Authentication authentication) throws IOException {
 
-
-        AuthenticationResponseDTO authenticationResponseDTO ;
-        var deviceInfo = httpServletRequest.getHeader(userAgentHeader);
-        LoginType loginType = LoginType.getLoginTypeByClientName(((OAuth2AuthenticationToken)authentication).getAuthorizedClientRegistrationId());
+        LoginType loginType = LoginType.getLoginTypeByClientName(((OAuth2AuthenticationToken)authentication)
+                .getAuthorizedClientRegistrationId());
         User user = getUser((OAuth2User) authentication.getPrincipal(),loginType);
-
-        if(userRepository.existsByEmail(user.getEmail())) {
             if (!user.getLoginType().contains(loginType)){
                 user.getLoginType().add(loginType);
                 user.setUserName(((OAuth2User) authentication.getPrincipal())
                         .<String>getAttribute("name"));
             }
-            authenticationResponseDTO=user.getDevices().stream()
-                    .anyMatch(device -> device.getDeviceInfo().equals(deviceInfo))?
-                    updateTokenResponse(user,deviceInfo,authentication.isAuthenticated()):
-                    createTokenResponse(user,deviceInfo,authentication.isAuthenticated());
-        } else {
-            userRepository.save(user);
-            authenticationResponseDTO = createTokenResponse(user, deviceInfo, authentication.isAuthenticated());
-        }
-
-        httpServletResponse.setStatus(HttpServletResponse.SC_OK);
-        objectMapper.writeValue(httpServletResponse.getWriter(), authenticationResponseDTO);
-        httpServletResponse.getWriter().flush();
-
-
+        user.setLastLoginDate(new Date());
+        userRepository.save(user);
+        httpServletResponse.sendRedirect("/loginSuccess");
     }
 
     private User getUser(OAuth2User oAuth2User,LoginType loginType){
@@ -74,33 +52,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .email(oAuth2User.<String>getAttribute("email"))
                 .roles(Collections.singletonList(roleService.getUserRole()))
                 .loginType(Collections.singletonList(loginType))
+                .createAccountDate(new Date())
                 .build());
     }
 
-    private AuthenticationResponseDTO updateTokenResponse(User user,String deviceInfo, boolean isAuthenticated){
-        return jwtService.updateTokenResponse(
-                user.getEmail(),
-                user.getRoles().stream()
-                        .map(role -> role.getAuthorities())
-                        .flatMap(authorities -> authorities.stream())
-                        .map(authority -> new SimpleGrantedAuthority(authority.getAuthorityName()))
-                        .collect(Collectors.toList()),
-                deviceInfo,
-                RefreshTokenState.UPDATE,
-                isAuthenticated);
-    }
-
-    private AuthenticationResponseDTO createTokenResponse(User user,String deviceInfo, boolean isAuthenticated){
-        return jwtService.createTokenResponse(
-                user.getEmail(),
-                user.getRoles().stream()
-                        .map(role -> role.getAuthorities())
-                        .flatMap(authorities -> authorities.stream())
-                        .map(authority -> new SimpleGrantedAuthority(authority.getAuthorityName()))
-                        .collect(Collectors.toList()),
-                deviceInfo,
-                RefreshTokenState.CREATE,
-                isAuthenticated,
-                false);
-    }
 }

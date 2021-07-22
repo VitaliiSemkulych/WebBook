@@ -4,6 +4,7 @@ import ch.qos.logback.classic.pattern.DateConverter;
 import com.example.demo.enums.LoginType;
 import com.example.demo.model.AbstractEntity;
 import com.example.demo.model.Book;
+import com.example.demo.model.Bookmark;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -11,6 +12,7 @@ import lombok.*;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -60,11 +62,17 @@ public class User extends AbstractEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastLoginDate;
 
+    @Column(name = "activation_code")
     private String activationCode;
 
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name="user_logo", columnDefinition="longblob", nullable=true)
+    private byte[] image;
 
-    @OneToMany(mappedBy="user")
-    private List<Device> devices;
+
+//    @OneToMany(mappedBy="user")
+//    private List<Device> devices;
 
     @ElementCollection(targetClass = LoginType.class)
     @CollectionTable(name="login_types")
@@ -83,38 +91,8 @@ public class User extends AbstractEntity {
     @Fetch(value = FetchMode.SUBSELECT)
     private List<Role> roles;
 
-    @ManyToMany(cascade = {
-            CascadeType.PERSIST,
-            CascadeType.MERGE
-    },fetch = FetchType.LAZY)
-    @JoinTable(name = "read_book",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "book_id")
-    )
-    @Fetch(value = FetchMode.JOIN)
-    private List<Book> readBook;
-
-    @ManyToMany(cascade = {
-            CascadeType.PERSIST,
-            CascadeType.MERGE
-    },fetch = FetchType.LAZY)
-    @JoinTable(name = "reading_book",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "book_id")
-    )
-    @Fetch(value = FetchMode.JOIN)
-    private List<Book> readingBook;
-
-    @ManyToMany(cascade = {
-            CascadeType.PERSIST,
-            CascadeType.MERGE
-    },fetch = FetchType.LAZY)
-    @JoinTable(name = "interesting_book",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "book_id")
-    )
-    @Fetch(value = FetchMode.JOIN)
-    private List<Book> interestingBook;
+    @OneToMany(mappedBy="user")
+    private List<Bookmark> bookmark;
 
 
 

@@ -70,6 +70,9 @@ logging:
       springframework: "INFO"
 
 
-
+number:
+  book:
+    onPage:3
 cors.allow.origins: "*"
 
+file.storage: "/files/"

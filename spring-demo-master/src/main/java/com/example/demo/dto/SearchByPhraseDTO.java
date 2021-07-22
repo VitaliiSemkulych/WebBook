@@ -10,8 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 @Builder
-public class SearchByPhraseModel {
+public class SearchByPhraseDTO {
     private String searchPhrase;
     private SearchType searchType;
-
 }

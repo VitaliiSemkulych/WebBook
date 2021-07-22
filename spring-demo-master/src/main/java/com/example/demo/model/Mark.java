@@ -21,7 +21,7 @@ import javax.persistence.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Mark extends AbstractEntity{
     @Column(nullable = false)
-    private float mark;
+    private int mark;
 
     @ManyToOne
     @JoinColumn(name="book_id", nullable=false)

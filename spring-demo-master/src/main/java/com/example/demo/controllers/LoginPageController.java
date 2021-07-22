@@ -1,20 +1,18 @@
 package com.example.demo.controllers;
 
-import com.example.demo.dto.SearchByPhraseModel;
-import com.example.demo.dto.UserRegisterForm;
-import com.example.demo.dao.GenreDAO;
-import com.example.demo.dao.UserRegistrFormDAO;
-import com.example.demo.letter.Letter;
-import com.example.demo.validator.UserRegistrValidator;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.demo.dto.SearchByPhraseDTO;
+import com.example.demo.dto.UserRegisterFormDTO;
+import com.example.demo.exception.enrollExeption.BadActivationCodeException;
+import com.example.demo.character.Letter;
+import com.example.demo.service.GenreService;
+import com.example.demo.service.UserService;
+import com.example.demo.service.security.UserEnrollmentService;
+import lombok.AllArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -22,96 +20,83 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.Optional;
 
 //controller which works with user log in ang registration functionality
 @Controller
+@AllArgsConstructor
 public class LoginPageController {
 
-    @Autowired
-    private UserRegistrFormDAO userRegistrFormDAO;
-
-    @Autowired
-    private UserRegistrValidator userRegistrValidator;
-
-    @Autowired
-    private GenreDAO genreDAO;
-
-//initialization binder where will be result of validation user data before registration or log in
-    @InitBinder
-    protected void initBinder(WebDataBinder dataBinder) {
-        // Form target
-        Object target = dataBinder.getTarget();
-        if (target == null) {
-            return;
-        }
-        System.out.println("Target=" + target);
-
-        if (target.getClass() == UserRegisterForm.class) {
-            dataBinder.setValidator(userRegistrValidator);
-        }
-
-    }
+    private final UserEnrollmentService userEnrollmentService;
+    private final UserService userService;
+    private final GenreService genreService;
 
 
+
+
+    //rewrite
     //method will be called after start application
-    @RequestMapping(value = {"/","/LoginPage"} , method = RequestMethod.GET)
-    public ModelAndView index() {
-
+    @GetMapping(value = {"/","/LoginPage"})
+    public String index(Model model) {
         ModelAndView modelAndView=new ModelAndView();
-        modelAndView.addObject("user",new UserRegisterForm());
-        modelAndView.setViewName("LoginPage.html");
-
-        return modelAndView;
+        model.addAttribute("user",new UserRegisterFormDTO());
+        return "LoginPage";
     }
 
     // method called after log in user to the account
-    @RequestMapping(value = "/loginSuccess" , method = RequestMethod.GET)
+    @GetMapping("/loginSuccess")
     public String login(Principal principal,HttpSession session,Model model,RedirectAttributes redirectAttributes) {
         String userEmail = principal.getName();
-        session.setAttribute("lodinUser",userRegistrFormDAO.findUserAccount(userEmail));
-        session.setAttribute("genreList",genreDAO.getGenreList());
+        session.setAttribute("loginUser",userService.getUserInfo(userEmail));
+        session.setAttribute("genreList",genreService.getGenres());
         session.setAttribute("letterList", Letter.getLetterList());
-        model.addAttribute("searchByPhrace",new SearchByPhraseModel());
-        redirectAttributes.addAttribute("id", 17);
+        session.setAttribute("searchByPhrase",new SearchByPhraseDTO());
+        redirectAttributes.addAttribute("genreName", "ALL GENRES");
+//        redirectAttributes.addAttribute("id", 17);
         return "redirect:/searchByGenre";
     }
 
     //method will be called after user log out from their account
-    @RequestMapping(value = "/logoutSuccessful", method = RequestMethod.GET)
+    @GetMapping("/logoutSuccessful")
     public String logoutSuccessfulPage(HttpSession session) {
+        SecurityContextHolder.clearContext();
         session.invalidate();
         return "redirect:/";
     }
 
 
-    // method process registration new users to the system
-    @RequestMapping(value = "/registrate" ,  method = RequestMethod.POST)
-    public String registrate(Model model, @Valid @ModelAttribute("user") UserRegisterForm rUser, BindingResult bindingResult) {
-
-        userRegistrValidator.validate(rUser,bindingResult);
+    @PostMapping("/enroll")
+    public String enroll (Model model, @Valid @ModelAttribute("user") UserRegisterFormDTO enrolledUser, BindingResult bindingResult){
         if (!bindingResult.hasErrors()) {
-            userRegistrFormDAO.addUserAccount(rUser);
-            String message = "Registration successful."
+            final String message = "Registration successful."
                     + "<br> Please login for enter.";
-            model.addAttribute("registMessage",message);
+            userEnrollmentService.enroll(enrolledUser);
+            model.addAttribute("enrollMassage", message);
         }
-
         return "LoginPage";
     }
+
+    @GetMapping("/activate")
+    public String activate(Model model,@RequestParam String activationCode) {
+        try {
+            userEnrollmentService.activateUser(activationCode);
+            model.addAttribute("accountActivationMessage","User activated");
+        } catch (BadActivationCodeException e) {
+            model.addAttribute("accountActivationMessage","Incorrect activation code");
+        }
+        return "User activated";
+    }
+
 
     /* redirect to 403 error page in case if user don't have authority permission
      * for using some resource or moving to some page
      */
-    @RequestMapping(value = "/403", method = RequestMethod.GET)
-    public String accessDenied(Model model, Principal principal) {
-
-        if (principal != null) {
-            String message = "Hi " + principal.getName() //
-                    + "<br> You do not have permission to access this page!";
-            model.addAttribute("message", message);
-
-        }
-
+    @GetMapping("/403")
+    public String accessDenied(Model model, Optional<Principal> principal) {
+        final String principleName=principal.isPresent()?principal.get().getName():"unsigned user";
+        final String message = "Hi " +  principleName
+                + "<br> You do not have permission to access this page!";
+        model.addAttribute("message", message);
         return "403Page";
     }
 

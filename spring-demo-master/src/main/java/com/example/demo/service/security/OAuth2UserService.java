@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.example.demo.service.security;
 
 
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

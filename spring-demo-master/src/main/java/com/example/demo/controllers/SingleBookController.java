@@ -1,11 +1,10 @@
 package com.example.demo.controllers;
 
-import com.example.demo.model.Mark;
-import com.example.demo.dto.SearchByPhraseModel;
-import com.example.demo.dto.UserRegisterForm;
-import com.example.demo.dao.BookDAO;
-import com.example.demo.dao.RecensionDAO;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.demo.dto.FrontendPropertiesDTO;
+import com.example.demo.dto.SearchByPhraseDTO;
+import com.example.demo.enums.BookmarkType;
+import com.example.demo.service.*;
+import lombok.AllArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -13,134 +12,83 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.security.Principal;
 
 // controller which work with single book page
 @Controller
+@AllArgsConstructor
 public class SingleBookController {
 
-    @Autowired
-    private RecensionDAO recencionDAO;
+    private final MarkService markService;
+    private final BookmarkService bookmarkService;
+    private final UserService userService;
+    private final BookService bookService;
+    private final CommentService commentService;
 
-    @Autowired
-    private BookDAO bookDAO;
 
-    //load single book page
-    @GetMapping(value = "/singleBook")
-    public String openBook(RedirectAttributes redirectAttributes, @RequestParam("id") long bookId, HttpSession session){
-        session.setAttribute("settingsLink",false);
-        session.setAttribute("userPageLink",false);
-        session.setAttribute("letterId",(char)' ');
-        session.setAttribute("genreId",(long)-1);
+
+
+    @GetMapping(value = "/book/{bookName}")
+    public String insertBookInfo(HttpSession session,Model model, @PathVariable("bookName") String bookName, Principal principal){
+
+        session.setAttribute("frontendProperties",
+                FrontendPropertiesDTO.getFrontendProperties("",' ',
+                        new SearchByPhraseDTO(),false,false));
+
         session.setAttribute("modifyRecensionId",-1);
-        redirectAttributes.addAttribute("id",bookId);
-        return "redirect:/book";
-    }
+        model.addAttribute("book",bookService.getBookByName(bookName));
+        model.addAttribute("inReadingMode",
+                bookmarkService.isBookBookmark(bookName,principal.getName(),BookmarkType.READING));
+        model.addAttribute("inInterestingMode",
+                bookmarkService.isBookBookmark(bookName,principal.getName(),BookmarkType.INTERESTING));
+        model.addAttribute("inReadMode",
+                bookmarkService.isBookBookmark(bookName,principal.getName(),BookmarkType.READ));
 
-    // set correspond attribute before log in selected book page
-    @GetMapping(value = "/book")
-    public String insertBookInfo(Model model, @RequestParam("id") long bookId,HttpSession session){
-        model.addAttribute("searchByPhrace",new SearchByPhraseModel());
-        model.addAttribute("book",bookDAO.selectBookByID(String.valueOf(bookId)));
+        model.addAttribute("isEvaluated",markService.isBookEvaluated(bookName,principal.getName()));
+        model.addAttribute("markOptionsList", markService.getMarkOptionList());
+        model.addAttribute("bookMark",markService.getAverageBookMark(bookName));
+        model.addAttribute("recensionList",commentService.getBookComments(bookName));
 
-        if(bookDAO.getReadingModeNumber(bookId,((UserRegisterForm)session.getAttribute("lodinUser")).getUserEmail())!=0){
-        model.addAttribute("inReadingMode",true);
-        }else{
-            model.addAttribute("inReadingMode",false);
-        }
-        if(bookDAO.getInterestingModeNumber(bookId,((UserRegisterForm)session.getAttribute("lodinUser")).getUserEmail())!=0){
-            model.addAttribute("inInterestingMode",true);
-        }else{
-            model.addAttribute("inInterestingMode",false);
-        }
-        if(bookDAO.getReadModeNumber(bookId,((UserRegisterForm)session.getAttribute("lodinUser")).getUserEmail())!=0){
-            model.addAttribute("inReadMode",true);
-        }else{
-            model.addAttribute("inReadMode",false);
-        }
-        if(bookDAO.getMarkNumber(bookId,((UserRegisterForm)session.getAttribute("lodinUser")).getUserEmail())!=0){
-
-            model.addAttribute("isEvaluated",true);
-        }else{
-
-            model.addAttribute("isEvaluated",false);
-
-        }
-        model.addAttribute("marckOptionsList", IntStream.rangeClosed(1, 5)
-                .boxed().collect(Collectors.toList()));
-        List<Mark> markList =bookDAO.getMarckList(bookId);
-        if (markList.isEmpty()){
-            model.addAttribute("bookMarck","Not evaluated yet");
-        }else {
-            int summ= markList.stream().mapToInt(o->o.getMark()).sum();
-            model.addAttribute("bookMarck",String.valueOf(new DecimalFormat("#.##")
-                    .format(summ/ markList.size())));
-
-        }
-        model.addAttribute("recensionList",recencionDAO.getRecensionList(bookId));
 
         return "singleBookPage";
     }
-    // Add or delete book in interesting bookmarks
-    @GetMapping(value = "/changeInterestingMode")
-    public String changeInterestingMode(RedirectAttributes redirectAttributes, @RequestParam("id") long bookId, HttpSession session){
 
-        if(bookDAO.getInterestingModeNumber(bookId,((UserRegisterForm)session.getAttribute("lodinUser")).getUserEmail())!=0){
-            bookDAO.delateBookInInterestingMode(bookId,((UserRegisterForm)session.getAttribute("lodinUser")).getUserEmail());
-        }else{
-            bookDAO.addBookInInterestingMode(bookId,((UserRegisterForm)session.getAttribute("lodinUser")).getUserEmail());
+    @PostMapping(value = "/evaluate/{bookName}")
+    public String evaluate(@PathVariable String bookName,@RequestParam("markValue") int mark, Principal principal){
+        markService.insertMark(bookService.getBookByName(bookName),
+                userService.getUserByEmail(principal.getName()),mark);
+        return "redirect:/book/"+bookName;
+    }
+
+
+    @GetMapping(value = "/changeBookmarkType/{bookName}/{bookmarkType}")
+    public String changeBookmarkType(@PathVariable("bookName") String bookName,Principal principal,
+            @PathVariable("bookmarkType") String bookmarkType){
+
+        if (bookmarkService.isBookBookmark(bookName, principal.getName(), BookmarkType.fromType(bookmarkType))) {
+            bookmarkService.deleteBookFromBookmark(bookName, principal.getName(), BookmarkType.fromType(bookmarkType));
+        } else {
+            bookmarkService.addBookToBookmark(bookService.getBookByName(bookName),
+                    userService.getUserByEmail(principal.getName()),
+                    BookmarkType.fromType(bookmarkType));
         }
-        redirectAttributes.addAttribute("id",bookId);
-        return "redirect:/book";
-    }
-    // Add or delete book in reading bookmarks
-    @GetMapping(value = "/changeReadingMode")
-    public String changeReadingMode(RedirectAttributes redirectAttributes, @RequestParam("id") long bookId, HttpSession session){
 
-        if(bookDAO.getReadingModeNumber(bookId,((UserRegisterForm)session.getAttribute("lodinUser")).getUserEmail())!=0){
-            bookDAO.delateBookInReadingMode(bookId,((UserRegisterForm)session.getAttribute("lodinUser")).getUserEmail());
-        }else{
-            bookDAO.addBookInReadingMode(bookId,((UserRegisterForm)session.getAttribute("lodinUser")).getUserEmail());
-        }
-        redirectAttributes.addAttribute("id",bookId);
-        return "redirect:/book";
-    }
-    // Add or delete book in read bookmarks
-    @GetMapping(value = "/changeReadMode")
-    public String changeReadMode(RedirectAttributes redirectAttributes, @RequestParam("id") long bookId, HttpSession session){
 
-        if(bookDAO.getReadModeNumber(bookId,((UserRegisterForm)session.getAttribute("lodinUser")).getUserEmail())!=0){
-            bookDAO.delateBookInReadMode(bookId,((UserRegisterForm)session.getAttribute("lodinUser")).getUserEmail());
-        }else{
-            bookDAO.addBookInReadMode(bookId,((UserRegisterForm)session.getAttribute("lodinUser")).getUserEmail());
-        }
-        redirectAttributes.addAttribute("id",bookId);
-        return "redirect:/book";
-    }
-    // book evaluation
-    @PostMapping(value = "/evaluate")
-    public String evaluate(RedirectAttributes redirectAttributes, @RequestParam("id") long bookId,@RequestParam("marckValue") int marck, HttpSession session){
-            bookDAO.updateMark(bookId,((UserRegisterForm)session.getAttribute("lodinUser")).getUserEmail(),marck);
-        redirectAttributes.addAttribute("id",bookId);
-        return "redirect:/book";
+        return "redirect:/book/"+bookName;
     }
 
+
+    //Дописати
     //function execute download book functionality
-    @GetMapping("/getContent")
-    public ResponseEntity<ByteArrayResource> downloadFile(@RequestParam("disposition") String disposition,@RequestParam("id") long bookId) throws IOException {
-        byte[] data = bookDAO.getContent(bookId);
-        String bookName = bookDAO.selectBookByID(String.valueOf(bookId)).getBookName();
+    @GetMapping("/getContent/{bookName}")
+    public ResponseEntity<ByteArrayResource> downloadFile(@RequestParam("disposition") String disposition,@PathVariable("bookName") String bookName) throws IOException {
+        byte[] data = bookService.getContent(bookName);
         ByteArrayResource resource = new ByteArrayResource(data);
-
         return ResponseEntity.ok()
                 // Content-Disposition
                 .header(HttpHeaders.CONTENT_DISPOSITION, disposition+";filename=" + bookName+".pdf")
@@ -152,52 +100,46 @@ public class SingleBookController {
     }
 
     //set recension in modify mode
-    @GetMapping("/modifyMode")
-    public String moveToModufyMode(HttpSession session,RedirectAttributes redirectAttributes,@RequestParam("id") long bookId,@RequestParam("recensionId") long recensionId){
-
+    @GetMapping("/modifyMode/{bookName}")
+    public String moveToModifyMode(HttpSession session,
+                                   @PathVariable("bookName") String bookName,
+                                   @RequestParam("recensionId") long recensionId){
         session.setAttribute("modifyRecensionId",recensionId);
-        redirectAttributes.addAttribute("id",bookId);
-        return "redirect:/book";
+        return "redirect:/book/"+bookName;
     }
 
     //reset recension from modify mode without modification
-    @GetMapping("/cancelModifyMode")
-    public String cancelModufyMode(HttpSession session,RedirectAttributes redirectAttributes,@RequestParam("id") long bookId){
-
+    @GetMapping("/cancelModifyMode/{bookName}")
+    public String cancelModifyMode(HttpSession session,@PathVariable("bookName") String bookName){
         session.setAttribute("modifyRecensionId",-1);
-        redirectAttributes.addAttribute("id",bookId);
         return "redirect:/book";
     }
 
     //execute recension modification
-    @PostMapping("/acceptModification")
-    public String acceptModification(HttpSession session,RedirectAttributes redirectAttributes,@RequestParam("id") long bookId,
+    @PostMapping("/acceptModification/{bookName}")
+    public String acceptModification(HttpSession session,@PathVariable("bookName") String bookName,
                                      @RequestParam("recensionId") long recensionId,
                                      @RequestParam("modifyRecensionText") String recensionText){
-
-        recencionDAO.modifyRecension(recensionId,recensionText);
+        commentService.modifyComment(recensionId,recensionText);
         session.setAttribute("modifyRecensionId",-1);
-        redirectAttributes.addAttribute("id",bookId);
-        return "redirect:/book";
+        return "redirect:/book/"+bookName;
     }
 
     //delete selected user recension
-    @GetMapping("/delateRecension")
-    public String delateRecension(RedirectAttributes redirectAttributes,@RequestParam("id") long bookId,
+    @GetMapping("/deleteRecension/{bookName}")
+    public String deleteComment(@PathVariable("bookName") String bookName,
                                   @RequestParam("recensionId") long recensionId){
-        recencionDAO.delateRecension(recensionId);
-        redirectAttributes.addAttribute("id",bookId);
-        return "redirect:/book";
+
+        commentService.deleteComment(recensionId);
+        return "redirect:/book/"+bookName;
     }
 
     //add recension written by user
-    @PostMapping("/sendRecension")
-    public String sendRecension(HttpSession session,RedirectAttributes redirectAttributes,
-                                @RequestParam("id") long bookId,
+    @PostMapping("/sendRecension/{bookName}")
+    public String sendComment(Principal principal,@PathVariable("bookName") String bookName,
                                 @RequestParam("recensionText") String recensionText){
-        recencionDAO.sendRecension(recensionText,bookId,((UserRegisterForm)session.getAttribute("lodinUser")).getUserEmail());
-        redirectAttributes.addAttribute("id",bookId);
-        return "redirect:/book";
+        commentService.sendComment(recensionText,bookName,principal.getName());
+        return "redirect:/book/"+bookName;
     }
 
 }

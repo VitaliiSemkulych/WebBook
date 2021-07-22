@@ -1,74 +1,72 @@
 package com.example.demo.controllers;
 
-import com.example.demo.dto.SearchByPhraseModel;
-import com.example.demo.dto.UserRegisterForm;
-import com.example.demo.dao.EditPersonalAccountDAO;
-import com.example.demo.validator.UserRegistrValidator;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.demo.dto.*;
+import com.example.demo.service.UserService;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
-import java.io.IOException;
+
 
 @Controller
+@AllArgsConstructor
 public class EditUserInfoController {
 
+    private final UserService userService;
 
-    @Autowired
-    private EditPersonalAccountDAO editPersonalAccountDAO;
-
-    @Autowired
-    private UserRegistrValidator userRegistrValidator;
-    //initialization binder where will be result of validation user data before actualization information about user
-    @InitBinder
-    protected void initBinder(WebDataBinder dataBinder) {
-        // Form target
-        Object target = dataBinder.getTarget();
-        if (target == null) {
-            return;
-        }
-        System.out.println("Target=" + target);
-
-        if (target.getClass() == UserRegisterForm.class) {
-            dataBinder.setValidator(userRegistrValidator);
-        }
-
-    }
     //method involve before load user upgrade settings page
     @GetMapping(value = "/userSettings")
     public String openBook(Model model,HttpSession session){
-        model.addAttribute("user",session.getAttribute("lodinUser"));
-        model.addAttribute("searchByPhrace",new SearchByPhraseModel());
-        session.setAttribute("settingsLink",true);
-        session.setAttribute("userPageLink",false);
-        session.setAttribute("letterId",(char)' ');
-        session.setAttribute("genreId",(long)-1);
+        model.addAttribute("user",session.getAttribute("loginUser"));
+        session.setAttribute("frontendProperties",FrontendPropertiesDTO.getFrontendProperties("",' ',
+                new SearchByPhraseDTO(),true,false));
+        session.setAttribute("updateUserInfo",new UpdateUserInfoRequestDTO());
+        session.setAttribute("updateUserImage",new UpdateUserImageRequestDTO());
+        session.setAttribute("updateUserEmail",new UpdateUserEmailRequestDTO());
         return "settings";
     }
-    // process update information about user
-    @PostMapping(value = "/changeInformation")
-    public String updateInformation( Model model, @Valid @ModelAttribute("user") UserRegisterForm user,
-                                     BindingResult bindingResult, HttpSession session) throws IOException {
-        model.addAttribute("searchByPhrace",new SearchByPhraseModel());
-        userRegistrValidator.validate(user,bindingResult);
+
+    @PostMapping("/updateUserInfo")
+    public String updateUserInformation( Model model, @Valid @ModelAttribute("updateUserInfo") UpdateUserInfoRequestDTO user,
+                                     BindingResult bindingResult, HttpSession session){
         if(!bindingResult.hasErrors()){
-            editPersonalAccountDAO.inputChanges(user);
-            session.setAttribute("lodinUser",user);
-            model.addAttribute("editMessage","Information udated!");
+            userService.updateUserInfo(user);
+            session.setAttribute("loginUser",user);
+            model.addAttribute("editMessage","Information updated!");
         }else{
-            if(user.getImage().getBytes().length==0 && !bindingResult.hasFieldErrors("password")) {
-                user.setImage(((UserRegisterForm)session.getAttribute("lodinUser")).getImage());
-                editPersonalAccountDAO.inputChanges(user);
-                session.setAttribute("lodinUser",user);
-                model.addAttribute("editMessage","Information udated!");
+                model.addAttribute("editMessage","Updating rejected!");
+        }
+        return "settings";
+    }
+
+    @PostMapping("/updateUserEmail")
+    public String updateUserEmail( Model model, @Valid @ModelAttribute("updateUserEmail") UpdateUserEmailRequestDTO user,
+                                     BindingResult bindingResult, HttpSession session){
+        if(!bindingResult.hasErrors()) {
+            if (userService.updateUserEmail(user)){
+                session.setAttribute("loginUser", user);
+                model.addAttribute("editMessage", "Information updated!");
+                return "settings";
             }
         }
+            model.addAttribute("editMessage","Updating rejected!");
+        return "settings";
+    }
 
+    @PostMapping("/updateUserImage")
+    public String updateUserImage( Model model, @Valid @ModelAttribute("updateUserImage") UpdateUserImageRequestDTO user,
+                                     BindingResult bindingResult, HttpSession session){
+        if(!bindingResult.hasErrors()){
+            if (userService.updateUserImage(user)) {
+                session.setAttribute("loginUser", user);
+                model.addAttribute("editMessage", "Information updated!");
+                return "settings";
+            }
+        }
+        model.addAttribute("editMessage","Updating rejected!");
         return "settings";
     }
 }

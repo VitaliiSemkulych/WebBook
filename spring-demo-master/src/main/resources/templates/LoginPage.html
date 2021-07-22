@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!--Login and registration page. Welcome application page. -->
+<!--LoginDTO and registration page. Welcome application page. -->
 <html xmlns:th="http://www.thymeleaf.org">
 <html lang="en">
 <head>
@@ -28,7 +28,7 @@
         <p class="authorsListTitle">Registration</p>
 
 
-        <form th:action="@{/registrate}"  th:object="${user}" enctype="multipart/form-data" method="POST" style="margin-left: 30%;padding-bottom: 10.5%">
+        <form th:action="@{/enroll}"  th:object="${user}" enctype="multipart/form-data" method="POST" style="margin-left: 30%;padding-bottom: 10.5%">
             <p class="singleLetter">User Name</p>
             <input  type="text" th:field="*{userName}" class="active-cyan-4" style="width: 400px;border-radius: 5px;margin-bottom: 2%;" placeholder="Name" required/><br>
             <span th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}">..</span>
@@ -38,7 +38,7 @@
             <p class="singleLetter">Password</p>
             <input type="password" th:field="*{password}" class="active-cyan-4" style="width: 400px;border-radius: 5px;margin-bottom: 2%;" placeholder="Password" required/><br>
             <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}">..</span>
-           <p class="singleLetter">Telephone Numner</p>
+           <p class="singleLetter">Telephone Number</p>
             <input  type="text" th:field="*{telephoneNumber}" class="active-cyan-4" style="width: 400px;border-radius: 5px;margin-bottom: 2%;"  placeholder="Phone Number" required/><br>
             <span th:if="${#fields.hasErrors('telephoneNumber')}" th:errors="*{telephoneNumber}">..</span>
             <div class="file-field">
@@ -53,8 +53,8 @@
                     </div>
                 </div>
             </div>
-            <input type="submit" class="btn btn-lg btn-primary" value="Registrate" />
-            <div th:if="${registMessage != null}" th:utext="${registMessage}" class="passwordErrorStyle"></div>
+            <input type="submit" class="btn btn-lg btn-primary" value="Sign up" />
+            <div th:if="${enrollMassage != null}" th:utext="${enrollMassage}" class="passwordErrorStyle"></div>
         </form>
 
     </div>

@@ -1,21 +1,20 @@
-package com.example.demo.letter;
+package com.example.demo.character;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 // create list with english alphabet letter
 public class Letter {
-    private static final List<Character> letterList;
+    private static final List<Character> characterList;
 
     static {
-        letterList = IntStream.rangeClosed('A', 'Z')
+        characterList = IntStream.rangeClosed('A', 'Z')
                 .mapToObj(i -> (char)i)
                 .collect(Collectors.toList());
     }
 
     public static List<Character> getLetterList() {
-        return letterList;
+        return characterList;
     }
 }

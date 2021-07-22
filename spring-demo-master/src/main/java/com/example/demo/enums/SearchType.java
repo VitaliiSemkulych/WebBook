@@ -1,17 +1,14 @@
 package com.example.demo.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public enum SearchType {
 
-    BOOK_NAME("BookName"),
-    AUTHOR("Author");
+    BOOK_NAME("BookName"), AUTHOR("Author");
 
-    private String value;
+    private final String type;
 
-    SearchType(String value){
-        this.value=value;
-    }
-
-    public String getValue(){
-        return value;
-    }
 }
