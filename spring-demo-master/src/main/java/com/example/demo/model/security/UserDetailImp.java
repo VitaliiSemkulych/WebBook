@@ -1,7 +1,6 @@
 package com.example.demo.model.security;
 
 
-import com.example.demo.model.security.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,13 +16,10 @@ public class UserDetailImp implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return user.getRoles().stream().map(role -> role.getAuthorities())
-                .flatMap(authorities -> authorities.stream())
-                .map(authority -> new SimpleGrantedAuthority(authority.getAuthorityName()))
+        return user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getRoleName()))
                 .collect(Collectors.toList());
 
     }
-
 
     @Override
     public String getPassword() {

@@ -6,7 +6,7 @@ import com.example.demo.model.security.User;
 import com.example.demo.repository.MarkRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +20,7 @@ public class MarkServiceImp implements MarkService{
     private final MarkRepository markRepository;
 
     @Override
+    @Transactional
     public void insertMark(Book book, User user, int mark) {
        markRepository.save(Mark.builder()
                .user(user)
@@ -29,8 +30,9 @@ public class MarkServiceImp implements MarkService{
     }
 
     @Override
-    public boolean isBookEvaluated(String bookName, String userEmail) {
-        return markRepository.existsByUserEmailAndBookName(userEmail,bookName);
+    @Transactional(readOnly = true)
+    public boolean isBookEvaluated(long bookId, String userEmail) {
+        return markRepository.existsByUserEmailAndBookId(userEmail,bookId);
     }
 
     @Override
@@ -40,9 +42,10 @@ public class MarkServiceImp implements MarkService{
     }
 
     @Override
-    public String getAverageBookMark(String bookName) {
+    @Transactional(readOnly = true)
+    public String getAverageBookMark(long bookId) {
         List<Mark> markList = StreamSupport
-                .stream(markRepository.findByBookName(bookName).spliterator(), false)
+                .stream(markRepository.findByBookId(bookId).spliterator(), false)
                 .collect(Collectors.toList());
         return markList.isEmpty()? "Not evaluated yet":
                 new DecimalFormat("#.##")

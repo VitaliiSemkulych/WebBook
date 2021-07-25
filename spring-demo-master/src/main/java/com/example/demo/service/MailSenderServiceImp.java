@@ -1,19 +1,20 @@
 package com.example.demo.service;
 
-
 import com.example.demo.model.security.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
 
 @Service
-public class MailSenderServiceImp implements MailSenderService {
+public class
+MailSenderServiceImp implements MailSenderService {
 
     private final JavaMailSender mailSender;
 
@@ -34,10 +35,6 @@ public class MailSenderServiceImp implements MailSenderService {
     private String siteUrL;
 
 
-
-
-
-
     @Override
     public void sendMime(User user) throws MessagingException, UnsupportedEncodingException {
 
@@ -46,16 +43,8 @@ public class MailSenderServiceImp implements MailSenderService {
                 + "<h3><a href=\"%s/activate/%s\" target=\"_self\">VERIFY</a></h3>"
                 + "Thank you,<br> %s",user.getUserName(),siteUrL,user.getActivationCode(),senderName);
 
-
-        //                "Dear "+user.getUserName()+",<br>"
-//                + "Please click the link below to verify your registration:<br>"
-//                + "<h3><a href=\""+siteUrL+"/activate/"+user.getActivationCode()+"\" target=\"_self\">VERIFY</a></h3>"
-//                + "Thank you,<br>"
-//                + "Your company name.";
-
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
-
         mimeMessageHelper.setFrom(applicationEmail,senderName);
         mimeMessageHelper.setTo(user.getEmail());
         mimeMessageHelper.setSubject(subject);

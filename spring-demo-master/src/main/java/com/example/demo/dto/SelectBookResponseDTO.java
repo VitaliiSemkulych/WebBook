@@ -1,6 +1,5 @@
 package com.example.demo.dto;
 
-import com.example.demo.model.Book;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,11 +15,11 @@ public class SelectBookResponseDTO {
     private int selectedPage;
     private int pageNumbers;
     private long selectedBookAmount;
-    private List<BookDTO> bookList;
+    private List<BookResponseDTO> bookList;
 
 
-    public static SelectBookResponseDTO getBookResponse(List<BookDTO> bookList, long selectedBookAmount,
-                                                              int pageNumbers, int selectedPage){
+    public static SelectBookResponseDTO getBookResponse(List<BookResponseDTO> bookList, long selectedBookAmount,
+                                                        int pageNumbers, int selectedPage){
         return SelectBookResponseDTO.builder()
                 .bookList(bookList)
                 .selectedBookAmount(selectedBookAmount)

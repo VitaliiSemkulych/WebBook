@@ -1,7 +1,5 @@
 package com.example.demo.service.security;
 
-
-
 import com.example.demo.model.security.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

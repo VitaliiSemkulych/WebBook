@@ -8,7 +8,6 @@ import org.hibernate.annotations.FetchMode;
 import javax.persistence.*;
 import java.util.List;
 
-//class which contain model for single genre category
 @Entity
 @Table(name = "genre")
 @Getter

@@ -8,7 +8,7 @@ import org.hibernate.annotations.FetchMode;
 import javax.persistence.*;
 import java.util.List;
 
-//class which contain model for book author
+
 @Entity
 @Table(name = "author")
 @RequiredArgsConstructor

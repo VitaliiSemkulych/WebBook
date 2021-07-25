@@ -5,9 +5,13 @@ import com.example.demo.dto.UpdateUserEmailRequestDTO;
 import com.example.demo.dto.UpdateUserImageRequestDTO;
 import com.example.demo.dto.UpdateUserInfoRequestDTO;
 import com.example.demo.dto.UserResponseDTO;
+import com.example.demo.exception.UnsupportedFormatException;
+import com.example.demo.model.FileInfo;
 import com.example.demo.model.security.User;
 import com.example.demo.repository.BookRepository;
+import com.example.demo.repository.FileInfoRepository;
 import com.example.demo.repository.security.UserRepository;
+import com.example.demo.utils.FileManager;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
@@ -25,21 +29,31 @@ import java.util.logging.Level;
 public class UserServiceImp implements UserService{
     private final UserRepository userRepository;
     private final MailSenderService mailSenderService;
-    private final BookRepository bookRepository;
+    private final FileManager fileManager;
+    private final FileInfoRepository fileInfoRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isUserExist(String email) {
         return userRepository.existsByEmail(email);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserResponseDTO getUserInfo(String userEmail) {
+        byte[] image;
         User user = userRepository.findByEmail(userEmail).get();
+        try {
+            image = fileManager.download(user.getImage().getKey());
+        } catch (IOException e) {
+            e.printStackTrace();
+            image = new byte[0];
+        }
         return UserResponseDTO.builder()
                 .userEmail(user.getEmail())
                 .userName(user.getUserName())
                 .telephoneNumber(user.getPhoneNumber())
-                .image(new DecoderMultipartFileImp(user.getImage()))
+                .image(new DecoderMultipartFileImp(user.getImage(),image))
                 .build();
     }
 
@@ -53,14 +67,16 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
-    @Transactional(rollbackFor = {IOException.class})
+    @Transactional(rollbackFor = {IOException.class,UnsupportedFormatException.class})
     public boolean updateUserImage(UpdateUserImageRequestDTO updateUserImageRequestDTO) {
         User user = userRepository.findByEmail(updateUserImageRequestDTO.getUserEmail()).get();
         try {
-            user.setImage(updateUserImageRequestDTO.getImage().getBytes());
+            FileInfo image = fileInfoRepository.save(FileInfo.fileInfoFactory(updateUserImageRequestDTO.getImage()));
+            fileManager.upload(updateUserImageRequestDTO.getImage().getBytes(),image.getKey());
+            user.setImage(image);
             userRepository.save(user);
             return true;
-        } catch (IOException e) {
+        } catch (IOException | UnsupportedFormatException e) {
             log.log(Level.WARNING,e.getMessage());
             e.printStackTrace();
             return false;
@@ -86,6 +102,7 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email).get();
     }

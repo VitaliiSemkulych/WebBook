@@ -16,7 +16,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
 
         @Override
-        @Transactional
+        @Transactional(readOnly = true)
         public UserDetails loadUserByUsername(String userEmail) throws UsernameNotFoundException {
             return userRepository
                     .findByEmail(userEmail)

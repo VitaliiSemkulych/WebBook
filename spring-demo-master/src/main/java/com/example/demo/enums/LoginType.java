@@ -1,7 +1,6 @@
 package com.example.demo.enums;
 
 import com.example.demo.exception.UnsupportedLoginTypeNameException;
-import com.example.demo.exception.UnsupportedSelectTypeException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

@@ -1,13 +1,11 @@
 package com.example.demo.controllers;
 
-
-import com.example.demo.dto.BookDTO;
+import com.example.demo.dto.BookResponseDTO;
 import com.example.demo.dto.FrontendPropertiesDTO;
 import com.example.demo.dto.SearchByPhraseDTO;
 import com.example.demo.dto.SelectBookResponseDTO;
 import com.example.demo.enums.BookmarkType;
 import com.example.demo.enums.SelectBookType;
-import com.example.demo.model.Book;
 import com.example.demo.service.BookService;
 import com.example.demo.service.BookmarkService;
 import lombok.AllArgsConstructor;
@@ -15,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpSession;
 import java.security.Principal;
 
@@ -24,7 +21,7 @@ import java.security.Principal;
 * */
 @Controller
 @AllArgsConstructor
-public class SearchController {
+public class SelectBookController {
 
     private final BookService bookService;
     private final BookmarkService bookmarkService;
@@ -34,12 +31,14 @@ public class SearchController {
     @RequestMapping(value = "/searchByPhrase/{page}" , method = RequestMethod.POST)
     public String searchByPhrase(Model model, HttpSession session, @PathVariable("page") int page,
                                  @ModelAttribute("searchPhrase") SearchByPhraseDTO searchPhrase){
-        Page<BookDTO> bookPage = bookService.selectByPhrase(searchPhrase,page);
+        Page<BookResponseDTO> bookPage = bookService.selectByPhrase(searchPhrase,page);
 
         model.addAttribute("bookSelectionResponse", SelectBookResponseDTO.getBookResponse(bookPage.getContent(),
                 bookPage.getTotalElements(),bookPage.getTotalPages(),page));
         session.setAttribute("frontendProperties",FrontendPropertiesDTO.getFrontendProperties("",
-                ' ', searchPhrase,false,false));
+                ' ', searchPhrase,false,false,
+                false,false,
+                false,false));
         return "BookMain";
     }
 
@@ -47,25 +46,29 @@ public class SearchController {
     @GetMapping(value = "/searchByGenre/{genreName}/{page}" )
     public String searchByGenre(Model model, HttpSession session, @PathVariable("genreName") String genreName,
                                 @PathVariable("page") int page){
-        Page<BookDTO> bookPage = bookService.selectByGenre(genreName,page);
+        Page<BookResponseDTO> bookPage = bookService.selectByGenre(genreName,page);
 
         model.addAttribute("bookSelectionResponse", SelectBookResponseDTO.getBookResponse(bookPage.getContent(),
                 bookPage.getTotalElements(),bookPage.getTotalPages(),page));
         session.setAttribute("frontendProperties",FrontendPropertiesDTO.getFrontendProperties(genreName,' ',
-                new SearchByPhraseDTO(),false,false));
+                new SearchByPhraseDTO(),false,false,
+                false,false,
+                false,false));
         return "BookMain";
     }
 
     //method will be called when user start search by first letter of book name.
     @GetMapping(value = "/searchByCharacter/{character}/{page}" )
-    public String searchByCharacter(Model model, @PathVariable("character") Character character,@PathVariable("page") int page,
-                                    HttpSession session){
-        Page<BookDTO> bookPage = bookService.selectByCharacter(character,page);
+    public String searchByCharacter(Model model, @PathVariable("character") Character character,
+                                    @PathVariable("page") int page, HttpSession session){
+        Page<BookResponseDTO> bookPage = bookService.selectByCharacter(character,page);
 
         model.addAttribute("bookSelectionResponse", SelectBookResponseDTO.getBookResponse(bookPage.getContent(),
                 bookPage.getTotalElements(),bookPage.getTotalPages(),page));
         session.setAttribute("frontendProperties",FrontendPropertiesDTO.getFrontendProperties("",character,
-                new SearchByPhraseDTO(),false,false));
+                new SearchByPhraseDTO(),false,false,
+                false,false,
+                false,false));
         return "BookMain";
     }
 
@@ -75,13 +78,15 @@ public class SearchController {
     @GetMapping(value = "/bookmark/{bookmarkType}/{page}" )
     public String bookmark(Model model, HttpSession session, Principal principal, @PathVariable("page") int page,
                            @PathVariable("bookmarkType") String bookmarkType){
-        Page<BookDTO> bookPage = bookmarkService.selectBookmarkPage(principal.getName(), page,
+        Page<BookResponseDTO> bookPage = bookmarkService.selectBookmarkPage(principal.getName(), page,
                 BookmarkType.fromType(bookmarkType));
 
         model.addAttribute("bookSelectionResponse", SelectBookResponseDTO.getBookResponse(bookPage.getContent(),
                 bookPage.getTotalElements(),bookPage.getTotalPages(),page));
         session.setAttribute("frontendProperties",FrontendPropertiesDTO.getFrontendProperties("",
-                ' ', new SearchByPhraseDTO(),false,true));
+                ' ', new SearchByPhraseDTO(),false,true,
+                false,false,
+                false,false));
         session.setAttribute("dashboard",bookmarkType);
         return "userPage";
     }

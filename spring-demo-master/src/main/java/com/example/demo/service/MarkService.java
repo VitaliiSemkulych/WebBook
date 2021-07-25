@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface MarkService {
     void insertMark(Book bookByName, User userByEmail, int mark);
-    boolean isBookEvaluated(String bookName, String userEmail);
+    boolean isBookEvaluated(long bookId, String userEmail);
     List<Integer> getMarkOptionList();
-    String getAverageBookMark(String bookName);
+    String getAverageBookMark(long bookId);
 }

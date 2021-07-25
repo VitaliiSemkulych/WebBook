@@ -1,23 +1,19 @@
 package com.example.demo.model.security;
 
-import ch.qos.logback.classic.pattern.DateConverter;
 import com.example.demo.enums.LoginType;
 import com.example.demo.model.AbstractEntity;
-import com.example.demo.model.Book;
 import com.example.demo.model.Bookmark;
+import com.example.demo.model.FileInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import lombok.*;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
-
 
 @Entity
 @Table(name = "users")
@@ -65,14 +61,14 @@ public class User extends AbstractEntity {
     @Column(name = "activation_code")
     private String activationCode;
 
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    @Column(name="user_logo", columnDefinition="longblob", nullable=true)
-    private byte[] image;
+//    @Lob
+//    @Basic(fetch = FetchType.LAZY)
+//    @Column(name="user_logo", columnDefinition="longblob", nullable=true)
+//    private byte[] image;
 
-
-//    @OneToMany(mappedBy="user")
-//    private List<Device> devices;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "image_id", referencedColumnName = "id")
+    private FileInfo image;
 
     @ElementCollection(targetClass = LoginType.class)
     @CollectionTable(name="login_types")

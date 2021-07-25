@@ -6,7 +6,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
@@ -19,10 +21,12 @@ public class EditUserInfoController {
 
     //method involve before load user upgrade settings page
     @GetMapping(value = "/userSettings")
-    public String openBook(Model model,HttpSession session){
+    public String openBook(Model model, HttpSession session){
         model.addAttribute("user",session.getAttribute("loginUser"));
-        session.setAttribute("frontendProperties",FrontendPropertiesDTO.getFrontendProperties("",' ',
-                new SearchByPhraseDTO(),true,false));
+        session.setAttribute("frontendProperties",FrontendPropertiesDTO.getFrontendProperties("",
+                ' ', new SearchByPhraseDTO(),true,false,
+                false, false,false,
+                false));
         session.setAttribute("updateUserInfo",new UpdateUserInfoRequestDTO());
         session.setAttribute("updateUserImage",new UpdateUserImageRequestDTO());
         session.setAttribute("updateUserEmail",new UpdateUserEmailRequestDTO());
@@ -30,8 +34,8 @@ public class EditUserInfoController {
     }
 
     @PostMapping("/updateUserInfo")
-    public String updateUserInformation( Model model, @Valid @ModelAttribute("updateUserInfo") UpdateUserInfoRequestDTO user,
-                                     BindingResult bindingResult, HttpSession session){
+    public String updateUserInformation( Model model, BindingResult bindingResult, HttpSession session,
+                                         @Valid @ModelAttribute("updateUserInfo") UpdateUserInfoRequestDTO user){
         if(!bindingResult.hasErrors()){
             userService.updateUserInfo(user);
             session.setAttribute("loginUser",user);

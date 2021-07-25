@@ -1,6 +1,5 @@
 package com.example.demo.model.security;
 
-
 import com.example.demo.model.AbstractEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
@@ -23,7 +22,6 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Role extends AbstractEntity {
 
-
     @Column(unique = true, nullable = false, name="role")
     @NonNull private String roleName;
 
@@ -31,14 +29,4 @@ public class Role extends AbstractEntity {
     @Fetch(value = FetchMode.SUBSELECT)
     private List<User> users;
 
-    @ManyToMany(cascade = {
-            CascadeType.PERSIST,
-            CascadeType.MERGE
-    },fetch = FetchType.EAGER)
-    @JoinTable(name = "roles_authorities",
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "authority_id")
-    )
-    @Fetch(value = FetchMode.SUBSELECT)
-    private List<Authority> authorities;
 }

@@ -1,9 +1,7 @@
 package com.example.demo.model;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
-import org.apache.tomcat.util.codec.binary.Base64;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -27,28 +25,17 @@ import java.util.List;
 public class Book extends AbstractEntity{
 
 
-    @Column(name = "book_name",unique = true,nullable = false)
+    @Column(name = "book_name",nullable = false)
     private String name;
     @Column(name = "page_number")
     private int pageNumber;
+    @Column(unique = true,nullable = false)
     private String isbn;
     @Column(name = "issued_date")
     @Temporal(TemporalType.DATE)
     @DateTimeFormat(pattern = "YYYY-MM-DD")
     private Date issuedDate;
     private String description;
-
-//----------------------------------------------------------------------------
-//Used in case of storing document in database
-//    @Lob
-//    @Basic(fetch = FetchType.LAZY)
-//    @Column(name="book_logo", columnDefinition="longblob", nullable=true)
-//    private byte[] image;
-//    @Lob
-//    @Basic(fetch = FetchType.LAZY)
-//    @Column(name="book_content", columnDefinition="longblob", nullable=true)
-//    private byte[] content;
-//------------------------------------------------------------------------------
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "image_id", referencedColumnName = "id")
     private FileInfo image;
@@ -66,7 +53,6 @@ public class Book extends AbstractEntity{
     )
     @Fetch(value = FetchMode.SUBSELECT)
     private List<Author> authors;
-    //many to many
     @ManyToMany(cascade = {
             CascadeType.PERSIST,
             CascadeType.MERGE
@@ -77,15 +63,11 @@ public class Book extends AbstractEntity{
     )
     @Fetch(value = FetchMode.SUBSELECT)
     private List<Genre> genres;
-
-    //many to one
     @ManyToOne
     @JoinColumn(name="publisher_id", nullable=false)
     private Publisher publisher;
-    //one to many fetch.type=lazy
     @OneToMany(mappedBy="book",fetch = FetchType.LAZY)
     private List<Comment> comments;
-    //one to many fetch.type=eager
     @OneToMany(mappedBy="book",fetch = FetchType.EAGER)
     private List<Mark> marks;
 

@@ -1,7 +1,6 @@
 package com.example.demo.constraint.annotation;
 
 import com.example.demo.constraint.validator.EmailAlreadyExistValidator;
-
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.*;

@@ -1,13 +1,11 @@
 package com.example.demo.model;
 
 import com.example.demo.model.security.User;
-import com.example.demo.utils.TextFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
 
-//class which contain model for book recension
 @Entity
 @Table(name = "comment")
 @Getter

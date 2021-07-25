@@ -1,7 +1,5 @@
 package com.example.demo.service;
 
-
-
 import com.example.demo.model.security.User;
 
 import javax.mail.MessagingException;

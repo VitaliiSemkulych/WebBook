@@ -1,9 +1,9 @@
 package com.example.demo.controllers;
 
+import com.example.demo.character.Letter;
 import com.example.demo.dto.SearchByPhraseDTO;
 import com.example.demo.dto.UserRegisterFormDTO;
 import com.example.demo.exception.enrollExeption.BadActivationCodeException;
-import com.example.demo.character.Letter;
 import com.example.demo.service.GenreService;
 import com.example.demo.service.UserService;
 import com.example.demo.service.security.UserEnrollmentService;
@@ -12,11 +12,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.security.Principal;
@@ -34,26 +33,24 @@ public class LoginPageController {
 
 
 
-    //rewrite
+
     //method will be called after start application
     @GetMapping(value = {"/","/LoginPage"})
     public String index(Model model) {
-        ModelAndView modelAndView=new ModelAndView();
         model.addAttribute("user",new UserRegisterFormDTO());
         return "LoginPage";
     }
 
     // method called after log in user to the account
     @GetMapping("/loginSuccess")
-    public String login(Principal principal,HttpSession session,Model model,RedirectAttributes redirectAttributes) {
+    public String login(Principal principal,HttpSession session,Model model) {
         String userEmail = principal.getName();
         session.setAttribute("loginUser",userService.getUserInfo(userEmail));
         session.setAttribute("genreList",genreService.getGenres());
         session.setAttribute("letterList", Letter.getLetterList());
         session.setAttribute("searchByPhrase",new SearchByPhraseDTO());
-        redirectAttributes.addAttribute("genreName", "ALL GENRES");
-//        redirectAttributes.addAttribute("id", 17);
-        return "redirect:/searchByGenre";
+
+        return "redirect:/searchByGenre/ALL GENRES/1";
     }
 
     //method will be called after user log out from their account
@@ -68,10 +65,9 @@ public class LoginPageController {
     @PostMapping("/enroll")
     public String enroll (Model model, @Valid @ModelAttribute("user") UserRegisterFormDTO enrolledUser, BindingResult bindingResult){
         if (!bindingResult.hasErrors()) {
-            final String message = "Registration successful."
-                    + "<br> Please login for enter.";
             userEnrollmentService.enroll(enrolledUser);
-            model.addAttribute("enrollMassage", message);
+            model.addAttribute("enrollMassage", "Registration successful."
+                    + "<br> Please login for enter.");
         }
         return "LoginPage";
     }
