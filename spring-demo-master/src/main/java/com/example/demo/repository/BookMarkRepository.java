@@ -7,7 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
+
 public interface BookMarkRepository extends PagingAndSortingRepository<Bookmark,Long> {
     Page<Bookmark> findByUserEmailAndType(String email, BookmarkType bookmarkType, PageRequest pageRequest);
     boolean existsByUserEmailAndBookIdAndType(String email, long bookId, BookmarkType bookmarkType);

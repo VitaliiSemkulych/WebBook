@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-@Repository
+
 public interface BookRepository extends PagingAndSortingRepository<Book,Long> {
 
     Optional<Book> findByName(String bookName);
